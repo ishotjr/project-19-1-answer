@@ -1,5 +1,13 @@
+//----------------------------------------------------------------------------------
+//
+// Project 19.1 from "Programming Pebble in C"
+// 
+// ishotjr, August 2016
+// Mike Jipping, August 2016
+
 #include <pebble.h>
 
+// These declarations are necessary to run on the watch
 static Window *s_window;
 
 static void prv_window_load(Window *window) {
