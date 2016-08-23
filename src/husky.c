@@ -4,6 +4,8 @@
 // 
 // ishotjr, August 2016
 // Mike Jipping, August 2016
+//
+// inspired by http://www.how-to-draw-funny-cartoons.com/how-to-draw-a-husky.html
 
 #include <pebble.h>
 
@@ -11,40 +13,123 @@
 static Window *s_window;
 static Layer *s_layer;
 
-// Points for animal path
-// TODO: turn into husky!
+// Points for various animal paths
 static const GPathInfo animal_points = {
-  .num_points = 43,
+  .num_points = 10,
   .points = (GPoint []) {
-    // head
-    {0,72}, {58,72}, {42,88}, {12,72}, {52,14}, {54,29}, {72,9},
-    // body
-    {110,23}, {126,43}, {133,73}, 
-    // tail to tip
-    {115,118}, {92,124}, {74,108}, {84,80}, {105,88}, {111,102},
-    {98,113}, {84, 104}, {91,96}, {100,101}, 
-    // tip to foot
-    {93,101}, {90,105}, {97,107}, {104,100},
-    {92,91}, {79,108}, {96,116}, {113,104}, {110,80},
-    // foot
-    {104,74}, {93,71}, {100,68}, {96,58},
-    // other foot
-    {72,72}, {72,91}, {65,101}, {49,101}, {52,97}, {65,90}, 
-    // the rest
-    {58,45}, {58,72}, {51,14}, {58, 72}
+    // ears
+    {40,14}, {54,38}, {144 - 54,38}, {144 - 40,14},
+    // haunches
+    {144 - 40,112}, {144 - 22,112}, {144 - 22,150}, {22,150}, {22,112}, {40,112}
   }
 };
+
+static const GPathInfo interior_points = {
+  .num_points = 17,
+  .points = (GPoint []) {
+    // left paw
+    {72,136}, {72,156}, {52,156}, {52,136},
+    // right paw
+    {144 - 72,136}, {144 - 72,156}, {144 - 52,156}, {144 - 52,136},
+    {72,136}, 
+    // chest/face
+    {86,136}, {86,98}, {96,98}, {96,48},
+    {144 - 96,48}, {144 - 96,98}, {144 - 86,98}, {144 - 86,136}
+  }
+};
+
+static const GPathInfo haunch_points = {
+  .num_points = 4,
+  .points = (GPoint []) {
+    // left haunch - will be duplicated and moved to create right
+    {22,150}, {22,112}, {40,112}, {40,150}, 
+  }
+};
+
+static const GPathInfo left_ear_points = {
+  .num_points = 3,
+  .points = (GPoint []) {
+    {40,22}, {50,40}, {40,46}
+  }
+};
+static const GPathInfo right_ear_points = {
+  .num_points = 3,
+  .points = (GPoint []) {
+    {144 - 40,22}, {144 - 50,40}, {144 - 40,46}
+  }
+};
+
+static const GPathInfo nose_points = {
+  .num_points = 12,
+  .points = (GPoint []) {
+    {72,74}, {66,80}, {72,86}, {72,92}, {62,90}, {72,92},
+    {144 - 72,92}, {144 - 62,90}, {144 - 72,92}, {144 - 72,86}, {144 - 66,80}, {144 - 72,74}
+  }
+};
+
+static const GPathInfo left_eye_points = {
+  .num_points = 4,
+  .points = (GPoint []) {
+    {58,64}, {64,60}, {68,66}, {62,68}
+  }
+};
+static const GPathInfo right_eye_points = {
+  .num_points = 4,
+  .points = (GPoint []) {
+    {144 - 58,64}, {144 - 64,60}, {144 - 68,66}, {144 - 62,68}
+  }
+};
+// can you tell what it is yet? :D
 
 
 // draw animal path along prescribed points
 static void prv_draw_animal(GContext *ctx) {
 
   GPath *animal_path = gpath_create(&animal_points);
+  GPath *interior_path = gpath_create(&interior_points);
+  GPath *left_haunch_path = gpath_create(&haunch_points);
+  GPath *right_haunch_path = gpath_create(&haunch_points);
+  GPath *left_ear_path = gpath_create(&left_ear_points);
+  GPath *right_ear_path = gpath_create(&right_ear_points);
+  GPath *nose_path = gpath_create(&nose_points);
+  GPath *left_eye_path = gpath_create(&left_eye_points);
+  GPath *right_eye_path = gpath_create(&right_eye_points);
 
-  graphics_context_set_fill_color(ctx, GColorGreen);
-  gpath_draw_filled(ctx, animal_path);
+  // duplicate and move the left haunch to create the right
+  // can rotate, but not mirror, so ears and eyes can't use this trick  
+  gpath_move_to(right_haunch_path, GPoint(144 - 22 - 40, 0));
+
   graphics_context_set_stroke_color(ctx, GColorBlack);
+
+  graphics_context_set_fill_color(ctx, GColorLightGray);
+  gpath_draw_filled(ctx, animal_path);
   gpath_draw_outline(ctx, animal_path);
+
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  gpath_draw_filled(ctx, interior_path);
+  gpath_draw_outline(ctx, interior_path);
+
+  gpath_draw_filled(ctx, left_haunch_path);
+  gpath_draw_outline(ctx, left_haunch_path);
+  gpath_draw_filled(ctx, right_haunch_path);
+  gpath_draw_outline(ctx, right_haunch_path);
+
+  gpath_draw_filled(ctx, left_ear_path);
+  gpath_draw_outline(ctx, left_ear_path);
+  gpath_draw_filled(ctx, right_ear_path);
+  gpath_draw_outline(ctx, right_ear_path);
+
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  gpath_draw_filled(ctx, nose_path);
+  gpath_draw_outline(ctx, nose_path);
+
+  // increase stroke for eyes
+  graphics_context_set_stroke_width(ctx, 2);
+  graphics_context_set_stroke_color(ctx, GColorVividCerulean);
+  gpath_draw_filled(ctx, left_eye_path);
+  gpath_draw_outline(ctx, left_eye_path);
+  gpath_draw_filled(ctx, right_eye_path);
+  gpath_draw_outline(ctx, right_eye_path);
 }
 
 // layer is never marked dirty again, so only called once
@@ -55,6 +140,9 @@ static void layer_update_callback(Layer *layer, GContext *ctx) {
 
 static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
+
+  // let's give our pup a colorful home
+  window_set_background_color(window, GColorOrange);  
 
   GRect frame = layer_get_frame(window_layer);
 
